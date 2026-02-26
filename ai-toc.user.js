@@ -163,7 +163,7 @@
         const container = document.getElementById(CONTENT_ID);
         if (!container) return;
         if (tocData.length === 0) {
-            container.innerHTML = '<div style="padding:20px;text-align:center;font-size:11px;opacity:0.4;">等待内容生成...</div>';
+            setSafeHTML(container, '<div style="padding:20px;text-align:center;font-size:11px;opacity:0.4;">等待内容生成...</div>');
             return;
         }
         container.innerHTML = '';
@@ -242,7 +242,7 @@
         else { root.style.left = 'auto'; root.style.right = '20px'; }
         if (savedConfig.collapsed) root.classList.add('collapsed');
 
-        root.innerHTML = `
+        setSafeHTML(root, `
             <div class="ai-toc-header">
                 <button id="ai-toc-toggle-btn" title="折叠/展开">
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 4L7 10L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -253,7 +253,7 @@
                 </button>
             </div>
             <div id="${CONTENT_ID}" class="ai-toc-content"></div>
-        `;
+        `);
 
         document.body.appendChild(root);
         setupDragging(root);
