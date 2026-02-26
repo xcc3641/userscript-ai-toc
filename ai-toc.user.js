@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AI Chat TOC - 智能侧边目录
 // @namespace    http://tampermonkey.net/
-// @version      2.6.2
+// @version      2.6.3
 // @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持拖拽、吸附、折叠、深色模式。
 // @author       xcc3641
 // @license      MIT
@@ -106,40 +106,47 @@
         .ai-toc-content::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
     `);
 
-    // --- 2. 标题收集算法 (适配更多平台) ---
+    // --- 2. 标题收集算法 ---
     function collectHeadings() {
         const results = [];
         const seenText = new Set();
-        const selectors = [
+        
+        // 如果在 Gemini 页面，直接进行全量扫描，不加任何前缀限制
+        const isGemini = window.location.hostname.includes('gemini.google.com');
+        const selectors = isGemini ? ['h2', 'h3'] : [
             '.markdown h2', '.markdown h3',
             'message-content h2', 'message-content h3',
             'markdown-element h2', 'markdown-element h3',
-            'ms-markdown-element h2', 'ms-markdown-element h3',
             '.model-response-text h2', '.model-response-text h3',
-            'model-response h2', 'model-response h3',
-            '.message-content h2', '.message-content h3',
-            '.font-claude-message h2', '.font-claude-message h3',
             '.prose h2', '.prose h3',
             '.ds-markdown h2', '.ds-markdown h3',
-            '.markdown-body h2', '.markdown-body h3',
-            // 通配兜底：只要在类似正文的容器里的标题都抓取
-            '.markdown-main-panel h2', '.markdown-main-panel h3'
+            '.markdown-body h2', '.markdown-body h3'
         ];
         
         const headings = document.querySelectorAll(selectors.join(', '));
         headings.forEach((h, index) => {
-            // 过滤掉隐藏标题和辅助功能标题
-            if (h.classList.contains('cdk-visually-hidden') || h.offsetParent === null) return;
+            // 过滤掉隐藏标题、辅助功能标题以及目录面板自身的标题
+            if (h.classList.contains('cdk-visually-hidden') || 
+                h.closest('#' + ROOT_ID) || 
+                h.offsetParent === null ||
+                h.innerText.trim().length < 2) return;
             
             const text = h.innerText.replace(/#+/g, '').trim();
-            if (!text || text.length < 2 || seenText.has(text)) return;
+            if (seenText.has(text)) return;
             seenText.add(text);
+            
             const id = h.id || `ai-toc-node-${index}`;
             h.id = id;
             results.push({ level: h.tagName === 'H2' ? 2 : 3, text: text, id: id, node: h });
         });
         return results;
     }
+    
+    // 暴露调试接口
+    window.__AI_TOC__ = {
+        collect: collectHeadings,
+        refresh: () => { tocData = collectHeadings(); renderTOC(); }
+    };
 
     // --- 3. UI 渲染逻辑 ---
     function renderTOC() {
