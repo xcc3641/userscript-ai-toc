@@ -147,13 +147,16 @@
         return results;
     }
     
-    // 暴露调试接口到 unsafeWindow
+    // 暴露调试接口
+    const api = {
+        collect: collectHeadings,
+        refresh: () => { tocData = collectHeadings(); renderTOC(); }
+    };
+    
     if (typeof unsafeWindow !== 'undefined') {
-        unsafeWindow.__AI_TOC__ = {
-            collect: collectHeadings,
-            refresh: () => { tocData = collectHeadings(); renderTOC(); }
-        };
+        unsafeWindow.__AI_TOC__ = api;
     }
+    window.__AI_TOC__ = api; // 双重挂载，确保万无一失
 
     // --- 3. UI 渲染逻辑 ---
     function renderTOC() {
