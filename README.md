@@ -2,6 +2,8 @@
 
 为主流 AI 聊天页面添加精致的侧边目录导航。支持 ChatGPT, Claude, Gemini, DeepSeek, Kimi。
 
+> 💡 **致敬与参考**: 本项目受 [leongao/ai-toc-extension](https://github.com/leongao/ai-toc-extension) 的启发进行油猴脚本化重构，旨在提供更轻量、跨平台的原生目录体验。
+
 ## 🚀 功能特性
 
 - **极致 UI**: 磨砂玻璃质感，支持系统级深色模式切换。
