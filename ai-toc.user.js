@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AI Chat TOC - 智能侧边目录
 // @namespace    http://tampermonkey.net/
-// @version      2.6.8
+// @version      2.6.9
 // @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持穿透 Shadow DOM 适配 Gemini。
 // @author       xcc3641
 // @license      MIT
@@ -181,7 +181,7 @@
             setSafeHTML(container, '<div style="padding:20px;text-align:center;font-size:11px;opacity:0.4;">等待内容生成...</div>');
             return;
         }
-        container.innerHTML = '';
+        container.replaceChildren();
         tocData.forEach(item => {
             const div = document.createElement('div');
             const isActive = activeId === item.id;
