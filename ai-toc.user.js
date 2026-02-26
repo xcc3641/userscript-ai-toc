@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AI Chat TOC - 智能侧边目录
 // @namespace    http://tampermonkey.net/
-// @version      2.6.3
+// @version      2.6.4
 // @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持拖拽、吸附、折叠、深色模式。
 // @author       xcc3641
 // @license      MIT
@@ -16,6 +16,7 @@
 // @match        https://chat.deepseek.com/*
 // @match        https://kimi.moonshot.cn/*
 // @grant        GM_addStyle
+// @grant        unsafeWindow
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -111,24 +112,21 @@
         const results = [];
         const seenText = new Set();
         
-        // 如果在 Gemini 页面，直接进行全量扫描，不加任何前缀限制
-        const isGemini = window.location.hostname.includes('gemini.google.com');
-        const selectors = isGemini ? ['h2', 'h3'] : [
+        // 采用原仓库更稳健的后代选择器思路，同时针对 Gemini 进行全量增强
+        const selectors = [
+            'h2', 'h3',
             '.markdown h2', '.markdown h3',
             'message-content h2', 'message-content h3',
-            'markdown-element h2', 'markdown-element h3',
+            'model-response h2', 'model-response h3',
             '.model-response-text h2', '.model-response-text h3',
-            '.prose h2', '.prose h3',
-            '.ds-markdown h2', '.ds-markdown h3',
-            '.markdown-body h2', '.markdown-body h3'
+            '.prose h2', '.prose h3'
         ];
         
         const headings = document.querySelectorAll(selectors.join(', '));
         headings.forEach((h, index) => {
-            // 过滤掉隐藏标题、辅助功能标题以及目录面板自身的标题
-            if (h.classList.contains('cdk-visually-hidden') || 
-                h.closest('#' + ROOT_ID) || 
-                h.offsetParent === null ||
+            // 基础过滤：跳过面板自身的标题和隐藏的辅助说明
+            if (h.closest('#' + ROOT_ID) || 
+                h.classList.contains('cdk-visually-hidden') ||
                 h.innerText.trim().length < 2) return;
             
             const text = h.innerText.replace(/#+/g, '').trim();
@@ -142,11 +140,13 @@
         return results;
     }
     
-    // 暴露调试接口
-    window.__AI_TOC__ = {
-        collect: collectHeadings,
-        refresh: () => { tocData = collectHeadings(); renderTOC(); }
-    };
+    // 暴露调试接口到 unsafeWindow
+    if (typeof unsafeWindow !== 'undefined') {
+        unsafeWindow.__AI_TOC__ = {
+            collect: collectHeadings,
+            refresh: () => { tocData = collectHeadings(); renderTOC(); }
+        };
+    }
 
     // --- 3. UI 渲染逻辑 ---
     function renderTOC() {
