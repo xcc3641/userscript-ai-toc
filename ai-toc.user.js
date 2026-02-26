@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AI Chat TOC - 智能侧边目录
 // @namespace    http://tampermonkey.net/
-// @version      2.6.4
-// @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持拖拽、吸附、折叠、深色模式。
+// @version      2.6.5
+// @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持穿透 Shadow DOM 适配 Gemini。
 // @author       xcc3641
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
@@ -107,24 +107,31 @@
         .ai-toc-content::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
     `);
 
-    // --- 2. 标题收集算法 ---
+    // --- 2. 核心算法：Shadow DOM 深度穿透扫描 ---
+    function querySelectorAllDeep(selector, root = document) {
+        let nodes = Array.from(root.querySelectorAll(selector));
+        const walk = (node) => {
+            if (node.shadowRoot) {
+                nodes = nodes.concat(Array.from(node.shadowRoot.querySelectorAll(selector)));
+                Array.from(node.shadowRoot.querySelectorAll('*')).forEach(walk);
+            }
+        };
+        root.querySelectorAll('*').forEach(walk);
+        return nodes;
+    }
+
     function collectHeadings() {
         const results = [];
         const seenText = new Set();
         
-        // 采用原仓库更稳健的后代选择器思路，同时针对 Gemini 进行全量增强
-        const selectors = [
-            'h2', 'h3',
-            '.markdown h2', '.markdown h3',
-            'message-content h2', 'message-content h3',
-            'model-response h2', 'model-response h3',
-            '.model-response-text h2', '.model-response-text h3',
-            '.prose h2', '.prose h3'
-        ];
+        // 针对不同平台优化选择器
+        const isGemini = window.location.hostname.includes('gemini.google.com');
+        const selectors = isGemini ? ['h2', 'h3'] : ['h2', 'h3', '.markdown h2', '.markdown h3'];
         
-        const headings = document.querySelectorAll(selectors.join(', '));
+        // 使用深度穿透扫描
+        const headings = querySelectorAllDeep(selectors.join(', '));
+        
         headings.forEach((h, index) => {
-            // 基础过滤：跳过面板自身的标题和隐藏的辅助说明
             if (h.closest('#' + ROOT_ID) || 
                 h.classList.contains('cdk-visually-hidden') ||
                 h.innerText.trim().length < 2) return;
