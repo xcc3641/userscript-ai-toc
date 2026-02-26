@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AI Chat TOC - 智能侧边目录
 // @namespace    http://tampermonkey.net/
-// @version      2.6.1
+// @version      2.6.2
 // @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持拖拽、吸附、折叠、深色模式。
 // @author       xcc3641
 // @license      MIT
@@ -111,21 +111,26 @@
         const results = [];
         const seenText = new Set();
         const selectors = [
-            'article .markdown h2', 'article .markdown h3',
+            '.markdown h2', '.markdown h3',
+            'message-content h2', 'message-content h3',
             'markdown-element h2', 'markdown-element h3',
-            'ms-markdown-element h2', 'ms-markdown-element h3', // 针对 Gemini 增强
-            '.message-content h2', '.message-content h3',
+            'ms-markdown-element h2', 'ms-markdown-element h3',
             '.model-response-text h2', '.model-response-text h3',
-            '.model-response h2', '.model-response h3', // 针对 Gemini 增强
+            'model-response h2', 'model-response h3',
+            '.message-content h2', '.message-content h3',
             '.font-claude-message h2', '.font-claude-message h3',
             '.prose h2', '.prose h3',
-            // DeepSeek & Kimi 适配
             '.ds-markdown h2', '.ds-markdown h3',
-            '.markdown-body h2', '.markdown-body h3'
+            '.markdown-body h2', '.markdown-body h3',
+            // 通配兜底：只要在类似正文的容器里的标题都抓取
+            '.markdown-main-panel h2', '.markdown-main-panel h3'
         ];
         
         const headings = document.querySelectorAll(selectors.join(', '));
         headings.forEach((h, index) => {
+            // 过滤掉隐藏标题和辅助功能标题
+            if (h.classList.contains('cdk-visually-hidden') || h.offsetParent === null) return;
+            
             const text = h.innerText.replace(/#+/g, '').trim();
             if (!text || text.length < 2 || seenText.has(text)) return;
             seenText.add(text);
