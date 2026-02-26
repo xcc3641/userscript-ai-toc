@@ -3,11 +3,11 @@
 // @namespace    http://tampermonkey.net/
 // @version      2.6.0
 // @description  为 ChatGPT, Claude, Gemini, DeepSeek, Kimi 等 AI 聊天页面添加精致的侧边目录导航。支持拖拽、吸附、折叠、深色模式。
-// @author       Hugo
+// @author       xcc3641
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=openai.com
-// @homepageURL  https://github.com/hugo/userscript-ai-toc
-// @supportURL   https://github.com/hugo/userscript-ai-toc/issues
+// @homepageURL  https://github.com/xcc3641/userscript-ai-toc
+// @supportURL   https://github.com/xcc3641/userscript-ai-toc/issues
 // @match        https://chatgpt.com/*
 // @match        https://chat.openai.com/*
 // @match        https://claude.ai/*

@@ -13,8 +13,8 @@
 
 1. 安装浏览器扩展 [Tampermonkey](https://www.tampermonkey.net/)。
 2. 点击下方链接安装脚本：
-   - **[通过 GitHub 直接安装 (推荐)](https://github.com/hugo/userscript-ai-toc/raw/main/ai-toc.user.js)**
-   - **[通过 OpenUserJS 安装](https://openuserjs.org/scripts/hugo/AI_Chat_TOC_-_智能侧边目录)**
+   - **[通过 GitHub 直接安装 (推荐)](https://github.com/xcc3641/userscript-ai-toc/raw/main/ai-toc.user.js)**
+   - **[通过 OpenUserJS 安装](https://openuserjs.org/scripts/xcc3641/AI_Chat_TOC_-_智能侧边目录)**
 
 ## 🛠️ 技术细节
 
@@ -23,4 +23,4 @@
 
 ## 📄 License
 
-MIT © Hugo
+MIT © xcc3641
