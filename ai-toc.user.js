@@ -113,8 +113,10 @@
         const selectors = [
             'article .markdown h2', 'article .markdown h3',
             'markdown-element h2', 'markdown-element h3',
+            'ms-markdown-element h2', 'ms-markdown-element h3', // 针对 Gemini 增强
             '.message-content h2', '.message-content h3',
             '.model-response-text h2', '.model-response-text h3',
+            '.model-response h2', '.model-response h3', // 针对 Gemini 增强
             '.font-claude-message h2', '.font-claude-message h3',
             '.prose h2', '.prose h3',
             // DeepSeek & Kimi 适配
@@ -259,10 +261,19 @@
             clearTimeout(timer);
             timer = setTimeout(() => {
                 const newData = collectHeadings();
-                if (newData.length !== tocData.length) { tocData = newData; renderTOC(); }
-            }, 1500);
+                if (newData.length !== tocData.length) { 
+                    tocData = newData; 
+                    renderTOC(); 
+                }
+            }, 1000); // 将 1500ms 缩短到 1000ms，让 Gemini 的流式生成显得更及时
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true }); // 增加 characterData 监听
+        
+        // 针对 Gemini 等单页应用的路由跳转监听
+        window.addEventListener('popstate', () => {
+            setTimeout(() => { tocData = collectHeadings(); renderTOC(); }, 1000);
+        });
+        
         window.addEventListener('resize', () => {
             const root = document.getElementById(ROOT_ID);
             if (root) {
